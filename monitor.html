@@ -45,7 +45,6 @@
             font-weight: 700;
             color: #007bff;
             line-height: 1;
-            text-shadow: 0 0 30px rgba(0, 123, 255, 0.5);
         }
 
         .next-card {
@@ -57,11 +56,6 @@
             border-left: 10px solid #28a745;
         }
 
-        .next-label {
-            font-size: 1.2rem;
-            color: #bbb;
-        }
-
         .next-number {
             font-size: 3.5rem;
             font-weight: 700;
@@ -71,20 +65,17 @@
         h2 {
             text-align: center;
             font-size: 2.5rem;
-            margin-bottom: 30px;
             color: #007bff;
         }
     </style>
 </head>
 
 <body>
-
     <div class="current-section">
         <div class="label">คิวปัจจุบัน</div>
         <div id="currentNumber" class="number">--</div>
-        <div id="statusText" style="font-size: 2.5rem; color: #28a745; margin-top: 20px;">กรุณาเชิญที่ช่องบริการ 1</div>
+        <div style="font-size: 2.5rem; color: #28a745; margin-top: 20px;">กรุณาเชิญที่ช่องบริการ 1</div>
     </div>
-
     <div class="next-section">
         <h2>คิวถัดไป</h2>
         <div id="nextQueues"></div>
@@ -92,9 +83,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getFirestore, collection, query, where, onSnapshot, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-        // ✅ รหัสเชื่อมต่อจริงของบอสจาก Dashboard
         const firebaseConfig = {
             apiKey: "AIzaSyDrc6ZDe5h8IMOpvUr7YP6heE8QgQZLjwA",
             authDomain: "easyqueue-ad588.firebaseapp.com",
@@ -108,38 +98,36 @@
         const db = getFirestore(app);
         let lastCalled = "";
 
+        // ฟังเสียงเรียก
         function speak(text) {
             const msg = new SpeechSynthesisUtterance();
             msg.text = text; msg.lang = 'th-TH'; msg.rate = 0.9;
             window.speechSynthesis.speak(msg);
         }
 
-        // 🔊 ดึงคิวที่เจ้าหน้าที่กด "เรียกคิว" (status == 'calling')
-        const qCalling = query(collection(db, "queues"), where("status", "==", "calling"), limit(1));
-        onSnapshot(qCalling, (snapshot) => {
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                if (data.displayNumber !== lastCalled) {
-                    document.getElementById('currentNumber').innerText = data.displayNumber;
-                    speak(`เชิญหมายเลข ${data.displayNumber} ค่ะ`);
-                    lastCalled = data.displayNumber;
-                }
-            });
-        });
-
-        // 📋 ดึงคิวที่กำลังรออยู่ (status == 'waiting')
-        const qWaiting = query(collection(db, "queues"), where("status", "==", "waiting"), orderBy("queueNumber"), limit(3));
-        onSnapshot(qWaiting, (snapshot) => {
+        // ดึงข้อมูลจากคอลเลกชันเดียวกับ Dashboard
+        onSnapshot(collection(db, "queues"), (snapshot) => {
             const listDiv = document.getElementById('nextQueues');
             listDiv.innerHTML = "";
+            let callingFound = false;
+
             snapshot.forEach((doc) => {
                 const data = doc.data();
-                listDiv.innerHTML += `
-                <div class="next-card">
-                    <div class="next-label">ลำดับรอ</div>
-                    <div class="next-number">${data.displayNumber}</div>
-                </div>`;
+                if (data.status === "calling") {
+                    document.getElementById('currentNumber').innerText = data.displayNumber;
+                    if (data.displayNumber !== lastCalled) {
+                        speak(`เชิญหมายเลข ${data.displayNumber} ค่ะ`);
+                        lastCalled = data.displayNumber;
+                    }
+                    callingFound = true;
+                } else if (data.status === "waiting") {
+                    listDiv.innerHTML += `
+                        <div class="next-card">
+                            <div class="next-number">${data.displayNumber}</div>
+                        </div>`;
+                }
             });
+            if (!callingFound) document.getElementById('currentNumber').innerText = "--";
         });
     </script>
 </body>
