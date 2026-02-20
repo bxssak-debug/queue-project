@@ -2,53 +2,236 @@
 <html lang="th">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EasyQueue - ระบบจองคิวออนไลน์</title>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>EASYQUEUE TAR & BOSS</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Open+Sans:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #1977cc;
+            --secondary: #fff;
+        }
+
+        body {
+            font-family: 'Kanit', 'Open Sans', sans-serif;
+            color: #444;
+            margin: 0;
+        }
+
+        /* Header & Navbar */
+        #header {
+            background: #fff;
+            transition: all 0.5s;
+            z-index: 997;
+            padding: 15px 0;
+            box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo a {
+            font-size: 28px;
+            margin: 0;
+            padding: 0;
+            line-height: 1;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #2c4964;
+            text-decoration: none;
+        }
+
+        .nav-menu a {
+            color: #2c4964;
+            padding: 10px 15px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .nav-menu a:hover {
+            color: var(--primary);
+        }
+
+        .appointment-btn {
+            margin-left: 25px;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 50px;
+            padding: 8px 25px;
+            text-decoration: none;
+            transition: 0.3s;
+            font-size: 14px;
+        }
+
+        .appointment-btn:hover {
+            background: #166ab5;
+            color: #fff;
+        }
+
+        /* Hero Section */
+        #hero {
+            width: 100%;
+            height: 90vh;
+            background: url('https://bootstrapmade.com/demo/templates/Medilab/assets/img/hero-bg.jpg') top center;
+            background-size: cover;
+            margin-top: 70px;
+            position: relative;
+        }
+
+        #hero:before {
+            content: "";
+            background: rgba(255, 255, 255, 0.6);
+            position: absolute;
+            bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
+        #hero .container {
+            position: relative;
+        }
+
+        #hero h1 {
+            margin: 0;
+            font-size: 48px;
+            font-weight: 700;
+            line-height: 56px;
+            color: #2c4964;
+        }
+
+        #hero h2 {
+            color: #437099;
+            margin: 10px 0 30px 0;
+            font-size: 24px;
+            font-weight: 400;
+        }
+
+        .btn-get-started {
+            font-weight: 500;
+            font-size: 16px;
+            letter-spacing: 1px;
+            display: inline-block;
+            padding: 10px 35px;
+            border-radius: 50px;
+            transition: 0.5s;
+            margin-top: 30px;
+            background: var(--primary);
+            color: #fff;
+            text-decoration: none;
+        }
+
+        /* Booking Card */
+        #booking {
+            padding: 80px 0;
+            background: #f1f7fd;
+        }
+
+        .booking-card {
+            background: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title h2 {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            position: relative;
+            color: #2c4964;
+            text-align: center;
+        }
+
+        .section-title h2::after {
+            content: "";
+            position: absolute;
+            display: block;
+            width: 50px;
+            height: 3px;
+            background: var(--primary);
+            bottom: 0;
+            left: calc(50% - 25px);
+        }
+    </style>
 </head>
 
-<body class="bg-light">
+<body>
 
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card shadow border-0 text-center">
-                    <div class="card-body p-5">
-                        <h2 class="card-title mb-4 text-primary">🏥 รับบัตรคิวออนไลน์</h2>
+    <header id="header" class="fixed-top">
+        <div class="container d-flex align-items-center justify-content-between">
+            <h1 class="logo"><a href="index.html">EASYQUEUE</a></h1>
+            <nav class="nav-menu d-none d-lg-block">
+                <a href="#hero">Home</a>
+                <a href="#booking">จองคิว</a>
+                <a href="dashboard.html">เจ้าหน้าที่</a>
+                <a href="monitor.html">หน้าจอประกาศ</a>
+            </nav>
+            <a href="#booking" class="appointment-btn">เริ่มจองคิว</a>
+        </div>
+    </header>
 
-                        <div class="mb-3 text-start">
-                            <label class="form-label fw-bold">ชื่อ - นามสกุล</label>
-                            <input type="text" class="form-control form-control-lg" id="patientName"
-                                placeholder="กรอกชื่อของคุณที่นี่">
+    <section id="hero" class="d-flex align-items-center">
+        <div class="container animate__animated animate__fadeIn">
+            <h1>Welcome to <br>EASYQUEUE TAR & BOSS</h1>
+            <h2>เว็ปโปรเจค ของต้าบอส</h2>
+            <a href="#booking" class="btn-get-started">เริ่มจองคิว</a>
+        </div>
+    </section>
+
+    <main id="main">
+        <section id="booking">
+            <div class="container">
+                <div class="section-title">
+                    <h2>รับบัตรคิวออนไลน์</h2>
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-lg-6">
+                        <div class="booking-card">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">ชื่อ - นามสกุล</label>
+                                <input type="text" id="patientName" class="form-control form-control-lg"
+                                    placeholder="กรอกชื่อของคุณ">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">แผนกที่ต้องการตรวจ</label>
+                                <select id="department" class="form-select form-select-lg">
+                                    <option value="general">ตรวจโรคทั่วไป</option>
+                                    <option value="dental">ทันตกรรม</option>
+                                    <option value="ortho">กระดูกและข้อ</option>
+                                </select>
+                            </div>
+                            <div class="d-grid">
+                                <button onclick="takeQueue()"
+                                    class="btn btn-primary btn-lg rounded-pill fw-bold">กดเพื่อรับคิว</button>
+                            </div>
+
+                            <div id="result" class="mt-4 d-none text-center">
+                                <div class="alert alert-success border-0 shadow-sm p-4">
+                                    <h4 class="fw-bold">🎉 จองคิวสำเร็จ!</h4>
+                                    <p class="mb-1">หมายเลขคิวของคุณคือ</p>
+                                    <h1 class="display-2 fw-bold text-primary" id="queueNumber">--</h1>
+                                </div>
+                            </div>
                         </div>
-
-                        <div class="mb-4 text-start">
-                            <label class="form-label fw-bold">แผนกที่ต้องการตรวจ</label>
-                            <select class="form-select form-select-lg" id="department">
-                                <option value="general">ตรวจโรคทั่วไป</option>
-                                <option value="dental">ทันตกรรม</option>
-                                <option value="ortho">กระดูกและข้อ</option>
-                            </select>
-                        </div>
-
-                        <button class="btn btn-primary btn-lg w-100 shadow-sm"
-                            onclick="bookQueue()">กดเพื่อรับคิว</button>
-
-                        <div id="resultBox" class="alert d-none mt-4 text-center shadow-sm" role="alert"></div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import {
-            getFirestore, collection, doc, runTransaction, serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-        // ใส่คีย์ของบอสให้เรียบร้อยแล้วครับ
         const firebaseConfig = {
             apiKey: "AIzaSyDrc6ZDe5h8IMOpvUr7YP6heE8QgQZLjwA",
             authDomain: "easyqueue-ad588.firebaseapp.com",
@@ -61,89 +244,29 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const DEPT_MAP = {
-            general: { prefix: "G", label: "ตรวจโรคทั่วไป" },
-            dental: { prefix: "D", label: "ทันตกรรม" },
-            ortho: { prefix: "O", label: "กระดูกและข้อ" }
-        };
+        window.takeQueue = async function () {
+            const name = document.getElementById('patientName').value;
+            const dept = document.getElementById('department').value;
+            if (!name) { alert("กรอกชื่อด้วยบอส!"); return; }
 
-        window.bookQueue = async function () {
-            const btn = document.querySelector(".btn-primary");
-            const nameInput = document.getElementById("patientName");
-            const name = nameInput.value.trim();
-            const deptKey = document.getElementById("department").value;
-            const resultBox = document.getElementById("resultBox");
-
-            // เคลียร์สถานะกล่องผลลัพธ์
-            resultBox.className = "alert mt-4 text-center shadow-sm d-none";
-
-            // เช็คชื่อว่าสั้นไปไหม
-            if (name.length < 3) {
-                resultBox.classList.remove("d-none");
-                resultBox.classList.add("alert-danger");
-                resultBox.innerHTML = "❌ กรุณากรอกชื่ออย่างน้อย 3 ตัวอักษร";
-                return;
-            }
-
-            // ล็อกปุ่มและหมุนโหลด
-            btn.disabled = true;
-            btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> กำลังออกบัตรคิว...`;
-
+            const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(new Date());
             try {
-                const dateKey = new Intl.DateTimeFormat('en-CA', {
-                    timeZone: 'Asia/Bangkok'
-                }).format(new Date());
+                const q = query(collection(db, "queues"), where("date", "==", today));
+                const snapshot = await getDocs(q);
+                const count = snapshot.size + 1;
+                const prefix = dept === 'general' ? 'G' : dept === 'dental' ? 'D' : 'O';
+                const displayNumber = `${prefix}-${count.toString().padStart(3, '0')}`;
 
-                const counterRef = doc(db, "counters", `${deptKey}_${dateKey}`);
-                const queueRef = doc(collection(db, "queues"));
-
-                const displayNumber = await runTransaction(db, async (transaction) => {
-                    const counterDoc = await transaction.get(counterRef);
-                    const nextNumber = (counterDoc.exists() ? counterDoc.data().currentNumber : 0) + 1;
-                    const display = `${DEPT_MAP[deptKey].prefix}-${String(nextNumber).padStart(3, "0")}`;
-
-                    transaction.set(counterRef, {
-                        currentNumber: nextNumber,
-                        department: deptKey,
-                        date: dateKey,
-                        lastUpdated: serverTimestamp()
-                    }, { merge: true });
-
-                    transaction.set(queueRef, {
-                        queueNumber: nextNumber,
-                        displayNumber: display,
-                        name: name,
-                        department: deptKey,
-                        date: dateKey,
-                        status: "waiting",
-                        createdAt: serverTimestamp()
-                    });
-
-                    return display;
+                await addDoc(collection(db, "queues"), {
+                    name: name, department: dept, displayNumber: displayNumber,
+                    queueNumber: count, status: "waiting", date: today, timestamp: serverTimestamp()
                 });
 
-                // แสดงผลสำเร็จ
-                resultBox.classList.remove("d-none");
-                resultBox.classList.add("alert-success");
-                resultBox.innerHTML = `
-            <h4 class="mb-2">🎉 จองคิวสำเร็จ!</h4>
-            <p class="mb-1">หมายเลขคิวของคุณคือ</p>
-            <h2 class="fw-bold text-success">${displayNumber}</h2>
-            <p class="mb-0">แผนก: ${DEPT_MAP[deptKey].label}</p>
-        `;
-
-                nameInput.value = "";
-
-            } catch (error) {
-                console.error(error);
-                resultBox.classList.remove("d-none");
-                resultBox.classList.add("alert-danger");
-                resultBox.innerHTML = "❌ ระบบขัดข้อง กรุณาลองใหม่ หรือเช็กการเชื่อมต่ออินเทอร์เน็ต";
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = "กดเพื่อรับคิว";
-            }
-        };
+                document.getElementById('queueNumber').innerText = displayNumber;
+                document.getElementById('result').classList.remove('d-none');
+                document.getElementById('patientName').value = "";
+            } catch (e) { alert("พลาดแล้วบอส!"); }
+        }
     </script>
 
 </body>
