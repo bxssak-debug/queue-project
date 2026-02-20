@@ -94,7 +94,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getFirestore, collection, query, where, onSnapshot, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-        // ใช้ Config เดียวกับ Dashboard ของบอสเป๊ะๆ
+        // ✅ รหัสเชื่อมต่อจริงของบอสจาก Dashboard
         const firebaseConfig = {
             apiKey: "AIzaSyDrc6ZDe5h8IMOpvUr7YP6heE8QgQZLjwA",
             authDomain: "easyqueue-ad588.firebaseapp.com",
@@ -114,7 +114,7 @@
             window.speechSynthesis.speak(msg);
         }
 
-        // ดึงคิวที่สถานะเป็น 'calling' มาโชว์ตัวใหญ่
+        // 🔊 ดึงคิวที่เจ้าหน้าที่กด "เรียกคิว" (status == 'calling')
         const qCalling = query(collection(db, "queues"), where("status", "==", "calling"), limit(1));
         onSnapshot(qCalling, (snapshot) => {
             snapshot.forEach((doc) => {
@@ -127,7 +127,7 @@
             });
         });
 
-        // ดึงคิวที่รอ (waiting) มาโชว์ข้างๆ
+        // 📋 ดึงคิวที่กำลังรออยู่ (status == 'waiting')
         const qWaiting = query(collection(db, "queues"), where("status", "==", "waiting"), orderBy("queueNumber"), limit(3));
         onSnapshot(qWaiting, (snapshot) => {
             const listDiv = document.getElementById('nextQueues');
