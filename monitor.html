@@ -4,80 +4,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบประกาศคิว - EasyQueue</title>
+    <title>Queue Monitor - EASYQUEUE TAR & BOSS</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
     <style>
+        :root {
+            --primary: #1977cc;
+            --secondary: #2c4964;
+            --success: #28a745;
+            --bg-light: #f1f7fd;
+        }
+
         body {
             font-family: 'Kanit', sans-serif;
-            background: #121212;
-            color: white;
             margin: 0;
+            background: var(--bg-light);
             display: flex;
+            flex-direction: column;
             height: 100vh;
             overflow: hidden;
         }
 
-        .current-section {
+        /* Top Header Area */
+        .top-bar {
+            background: #fff;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        .brand {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--secondary);
+            letter-spacing: 1px;
+        }
+
+        .clock {
+            font-size: 24px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* Main Screen Layout */
+        .main-container {
+            flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Left Panel: Current Calling Queue */
+        .current-panel {
             flex: 2;
-            background: #1e1e1e;
+            background: #fff;
+            border-radius: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-right: 5px solid #007bff;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+            border: 2px solid #e1f0ff;
         }
 
-        .next-section {
+        .label-current {
+            font-size: 4rem;
+            color: #666;
+            margin-bottom: 0;
+            font-weight: 300;
+        }
+
+        .number-main {
+            font-size: 22rem;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 0.9;
+            text-shadow: 10px 10px 0px rgba(25, 119, 204, 0.05);
+        }
+
+        .status-msg {
+            font-size: 3.5rem;
+            color: var(--success);
+            margin-top: 30px;
+            background: #e8f5e9;
+            padding: 10px 50px;
+            border-radius: 50px;
+        }
+
+        /* Right Panel: Waiting List */
+        .sidebar-panel {
             flex: 1;
-            background: #252525;
-            padding: 20px;
+            background: var(--secondary);
+            border-radius: 30px;
+            padding: 30px;
             display: flex;
             flex-direction: column;
+            color: #fff;
         }
 
-        .number {
-            font-size: 18rem;
-            font-weight: 700;
-            color: #007bff;
-            line-height: 1;
+        .sidebar-header {
+            text-align: center;
+            font-size: 2.5rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .waiting-list {
+            flex: 1;
+            overflow-y: hidden;
         }
 
         .next-card {
-            background: #333;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
             padding: 20px;
-            border-radius: 15px;
             margin-bottom: 15px;
-            text-align: center;
-            border-left: 10px solid #28a745;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 8px solid var(--primary);
+            transition: 0.3s;
         }
 
-        .next-number {
+        .next-card h2 {
+            margin: 0;
             font-size: 3.5rem;
             font-weight: 700;
-            color: #28a745;
+        }
+
+        .next-card p {
+            margin: 0;
+            font-size: 1.2rem;
+            opacity: 0.7;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="current-section">
-        <div style="font-size:3rem;color:#aaa;">คิวปัจจุบัน</div>
-        <div id="currentNumber" class="number">--</div>
-        <div style="font-size:2.5rem;color:#28a745;margin-top:20px;">
-            กรุณาเชิญที่ช่องบริการ 1
-        </div>
+    <div class="top-bar">
+        <div class="brand"><i class="bi bi-hospital"></i> EASYQUEUE TAR & BOSS</div>
+        <div class="clock" id="digitalClock">00:00:00</div>
     </div>
 
-    <div class="next-section">
-        <h2 style="text-align:center;color:#007bff;">คิวถัดไป</h2>
-        <div id="nextQueues"></div>
+    <div class="main-container">
+        <div class="current-panel shadow">
+            <p class="label-current">คิวปัจจุบัน</p>
+            <div id="curNum" class="number-main animate__animated animate__pulse animate__infinite">--</div>
+            <div class="status-msg"><i class="bi bi-megaphone-fill"></i> กรุณาเชิญที่ช่องบริการ 1</div>
+        </div>
+
+        <div class="sidebar-panel shadow">
+            <div class="sidebar-header">คิวถัดไป</div>
+            <div id="nextQueues" class="waiting-list">
+            </div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { getFirestore, collection, query, where, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
+        // Firebase Config ของบอส
         const firebaseConfig = {
             apiKey: "AIzaSyDrc6ZDe5h8IMOpvUr7YP6heE8QgQZLjwA",
             authDomain: "easyqueue-ad588.firebaseapp.com",
@@ -89,61 +183,66 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(new Date());
 
-        let lastCalled = "";
+        let lastNum = "";
 
-        function getTodayKey() {
-            return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(new Date());
-        }
+        // ฟังก์ชันนาฬิกา
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('digitalClock').innerText = now.toLocaleTimeString('th-TH');
+        }, 1000);
 
+        // ฟังก์ชันเสียงพยาบาลสาว
         function speak(text) {
             const msg = new SpeechSynthesisUtterance();
-            msg.text = text;
-            msg.lang = 'th-TH';
-            msg.rate = 0.9;
-            window.speechSynthesis.cancel();
+            msg.text = text; msg.lang = 'th-TH'; msg.rate = 0.9;
             window.speechSynthesis.speak(msg);
         }
 
-        const q = query(
-            collection(db, "queues"),
-            where("date", "==", getTodayKey())
-        );
+        // ดึงข้อมูล Real-time
+        onSnapshot(collection(db, "queues"), (snapshot) => {
+            const nextList = document.getElementById('nextQueues');
+            nextList.innerHTML = "";
+            let calling = "--";
 
-        onSnapshot(q, (snapshot) => {
-            const listDiv = document.getElementById('nextQueues');
-            listDiv.innerHTML = "";
+            const sortedDocs = snapshot.docs
+                .map(d => d.data())
+                .filter(q => q.date === today)
+                .sort((a, b) => a.queueNumber - b.queueNumber);
 
-            let queues = [];
-            snapshot.forEach(doc => queues.push(doc.data()));
-            queues.sort((a, b) => a.queueNumber - b.queueNumber);
-
-            let callingFound = false;
-
-            queues.forEach(data => {
-                if (data.status === "calling") {
-                    document.getElementById('currentNumber').innerText = data.displayNumber;
-                    if (data.displayNumber !== lastCalled) {
-                        speak(`เชิญหมายเลข ${data.displayNumber} ค่ะ`);
-                        lastCalled = data.displayNumber;
+            sortedDocs.forEach(q => {
+                if (q.status === 'calling') {
+                    calling = q.displayNumber;
+                    if (calling !== lastNum) {
+                        const curDiv = document.getElementById('curNum');
+                        curDiv.classList.remove('animate__pulse');
+                        void curDiv.offsetWidth; // Trigger reflow
+                        curDiv.classList.add('animate__bounceIn');
+                        speak(`เชิญหมายเลข ${calling} ค่ะ`);
+                        lastNum = calling;
+                        setTimeout(() => curDiv.classList.add('animate__pulse'), 1000);
                     }
-                    callingFound = true;
-                }
-                else if (data.status === "waiting") {
-                    listDiv.innerHTML += `
-                <div class="next-card">
-                    <div class="next-number">${data.displayNumber}</div>
-                </div>
-            `;
+                } else if (q.status === 'waiting') {
+                    nextList.innerHTML += `
+                        <div class="next-card animate__animated animate__fadeInRight">
+                            <div>
+                                <p>ลำดับรอ</p>
+                                <h2>${q.displayNumber}</h2>
+                            </div>
+                            <i class="bi bi-arrow-right-circle fs-1 opacity-25"></i>
+                        </div>`;
                 }
             });
-
-            if (!callingFound) {
-                document.getElementById('currentNumber').innerText = "--";
-            }
+            document.getElementById('curNum').innerText = calling;
         });
-    </script>
 
+        // คลิกหน้าจอเพื่ออนุญาตเสียง (Browser Security)
+        document.body.addEventListener('click', () => {
+            console.log("Audio Enabled");
+            speak("ระบบประกาศคิวพร้อมทำงานค่ะ");
+        }, { once: true });
+    </script>
 </body>
 
 </html>

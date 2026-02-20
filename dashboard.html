@@ -3,187 +3,103 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EasyQueue - หน้าจอเจ้าหน้าที่</title>
-
+    <title>Staff Dashboard - EASYQUEUE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
-
     <style>
-        body {
-            background-color: #1a1a1a;
-            color: #ffffff;
+        :root {
+            --primary: #1977cc;
+            --bg: #f8f9fa;
         }
 
-        .card-queue {
-            background-color: #2d2d2d;
-            border: none;
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: var(--bg);
+            padding: 40px 0;
+        }
+
+        .q-card {
+            background: #fff;
             border-radius: 15px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             transition: 0.3s;
         }
 
+        .q-card:hover {
+            transform: translateY(-5px);
+        }
+
         .status-calling {
-            border: 2px solid #ffc107;
-            box-shadow: 0 0 20px rgba(255, 193, 7, 0.6);
-            transform: scale(1.02);
+            border-left: 10px solid #ffc107;
+            background: #fffdf5;
+        }
+
+        .badge-dept {
+            background: #e1f0ff;
+            color: #007bff;
+            border-radius: 50px;
+            padding: 5px 15px;
         }
     </style>
 </head>
 
 <body>
-
-    <div class="container mt-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>🖥️ ระบบเรียกคิว (สำหรับเจ้าหน้าที่)</h2>
-            <h5 id="dateDisplay" class="text-info"></h5>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <h2 class="fw-bold text-dark">🖥️ ระบบเรียกคิวเจ้าหน้าที่</h2>
+            <h5 class="text-primary fw-bold" id="dateDisplay"></h5>
         </div>
-
         <div class="row" id="queueList"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import {
-            getFirestore,
-            collection,
-            query,
-            where,
-            onSnapshot,
-            doc,
-            updateDoc
-        } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDrc6ZDe5h8IMOpvUr7YP6heE8QgQZLjwA",
-            authDomain: "easyqueue-ad588.firebaseapp.com",
-            projectId: "easyqueue-ad588",
-            storageBucket: "easyqueue-ad588.firebasestorage.app",
-            messagingSenderId: "374878485971",
-            appId: "1:374878485971:web:798a12b88248d213c50326"
-        };
-
+        import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        const firebaseConfig = { apiKey: "AIzaSyDrc6ZDe5h8IMOpvUr7YP6heE8QgQZLjwA", authDomain: "easyqueue-ad588.firebaseapp.com", projectId: "easyqueue-ad588", storageBucket: "easyqueue-ad588.firebasestorage.app", messagingSenderId: "374878485971", appId: "1:374878485971:web:798a12b88248d213c50326" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(new Date());
+        document.getElementById('dateDisplay').innerText = today;
 
-        const DEPT_MAP = {
-            general: "ตรวจโรคทั่วไป",
-            dental: "ทันตกรรม",
-            ortho: "กระดูกและข้อ"
-        };
-
-        function getThaiDateKey() {
-            return new Intl.DateTimeFormat('en-CA', {
-                timeZone: 'Asia/Bangkok'
-            }).format(new Date());
-        }
-
-        const todayKey = getThaiDateKey();
-        document.getElementById('dateDisplay').innerText = `คิวประจำวันที่: ${todayKey}`;
-
-        function loadDashboard() {
-            const q = query(
-                collection(db, "queues"),
-                where("date", "==", todayKey),
-                where("status", "in", ["waiting", "calling"])
-            );
-
-            onSnapshot(q, (snapshot) => {
-                const queueList = document.getElementById("queueList");
-                queueList.innerHTML = "";
-
-                if (snapshot.empty) {
-                    queueList.innerHTML =
-                        `<div class="col-12 text-center text-secondary mt-5">
-                            <h4>ยังไม่มีคิวในระบบวันนี้</h4>
-                        </div>`;
-                    return;
-                }
-
-                let queues = [];
-                snapshot.forEach(docSnap =>
-                    queues.push({ id: docSnap.id, ...docSnap.data() })
-                );
-
-                queues.sort((a, b) => a.queueNumber - b.queueNumber);
-
-                queues.forEach(data => {
-                    const isCalling = data.status === "calling";
-                    const deptNameThai = DEPT_MAP[data.department] || data.department;
-
-                    queueList.innerHTML += `
-                        <div class="col-md-4 mb-4">
-                            <div class="card card-queue p-3 ${isCalling ? 'status-calling' : ''}">
-                                <div class="card-body text-center">
-                                    <span class="badge ${isCalling ? 'bg-warning text-dark' : 'bg-info text-dark'} mb-2 fs-6">
-                                        ${deptNameThai}
-                                    </span>
-
-                                    <h1 class="display-3 fw-bold text-${isCalling ? 'warning' : 'primary'} my-3">
-                                        ${data.displayNumber}
-                                    </h1>
-
-                                    <h4 class="mb-4 text-light">${data.name}</h4>
-
-                                    <div class="d-grid gap-2">
-                                        ${!isCalling
-                            ? `<button class="btn btn-warning btn-lg fw-bold"
-                                onclick="updateStatus('${data.id}', 'calling', '${data.displayNumber}', '${deptNameThai}', '${data.name}')">
-                                🔊 เรียกคิว
-                               </button>`
-                            : `<button class="btn btn-success btn-lg fw-bold"
-                                onclick="updateStatus('${data.id}', 'completed')">
-                                ✅ ตรวจเสร็จสิ้น
-                               </button>`
-                        }
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
+        onSnapshot(query(collection(db, "queues"), where("date", "==", today), where("status", "in", ["waiting", "calling"])), (snap) => {
+            const list = document.getElementById("queueList");
+            list.innerHTML = "";
+            if (snap.empty) { list.innerHTML = `<div class="text-center text-muted"><h4>ยังไม่มีคิวค้างอยู่ในระบบครับบอส</h4></div>`; return; }
+            snap.forEach(d => {
+                const q = d.data();
+                const isCalling = q.status === "calling";
+                list.innerHTML += `
+          <div class="col-md-4 mb-4">
+            <div class="card q-card p-4 ${isCalling ? 'status-calling' : ''}">
+              <div class="text-center">
+                <span class="badge-dept mb-3 d-inline-block small">${q.department}</span>
+                <h1 class="display-3 fw-bold text-primary mb-2">${q.displayNumber}</h1>
+                <h4 class="mb-4 text-dark">${q.name}</h4>
+                <div class="d-grid gap-2">
+                  <button class="btn btn-warning fw-bold btn-lg rounded-pill" onclick="updateQ('${d.id}', 'calling', '${q.displayNumber}', '${q.department}', '${q.name}')">🔊 เรียก</button>
+                  <button class="btn btn-success fw-bold btn-lg rounded-pill" onclick="finishQ('${d.id}')">✅ ใส่ราคา & ตรวจเสร็จ</button>
+                </div>
+              </div>
+            </div>
+          </div>`;
             });
-        }
+        });
 
-        // 🔊 ระบบเสียงเรียกคิว (กันเสียงทับเรียบร้อย)
-        window.speakQueue = function (queueNumber, deptName, patientName) {
-            const readableQueue = queueNumber.split('-').join(' ');
-            const textToSpeak =
-                `ขอเชิญคุณ ${patientName}, คิวหมายเลข ${readableQueue}, ที่แผนก ${deptName} ค่ะ`;
-
-            if (window.responsiveVoice) {
-                responsiveVoice.cancel(); // กันเสียงซ้อน
-                responsiveVoice.speak(textToSpeak, "Thai Female", {
-                    rate: 0.8,
-                    pitch: 1.1
-                });
+        window.updateQ = async (id, status, no, dept, name) => {
+            if (status === 'calling') {
+                const text = `ขอเชิญคุณ ${name}, คิวหมายเลข ${no.split('-').join(' ')}, ที่ช่องบริการ 1 ค่ะ`;
+                responsiveVoice.speak(text, "Thai Female", { rate: 0.9 });
             }
+            await updateDoc(doc(db, "queues", id), { status });
         };
 
-        window.updateStatus = async function (
-            docId,
-            newStatus,
-            queueNumber = '',
-            deptName = '',
-            patientName = ''
-        ) {
-            try {
-                if (newStatus === 'calling') {
-                    speakQueue(queueNumber, deptName, patientName);
-                }
-
-                await updateDoc(doc(db, "queues", docId), {
-                    status: newStatus
-                });
-
-            } catch (error) {
-                console.error("Error updating status: ", error);
-                alert("อัปเดตสถานะไม่สำเร็จ");
-            }
+        window.finishQ = async (id) => {
+            const p = prompt("ระบุค่าใช้จ่าย (บาท):");
+            if (p && !isNaN(p)) await updateDoc(doc(db, "queues", id), { totalPrice: Number(p), status: "completed" });
         };
-
-        loadDashboard();
     </script>
-
 </body>
 
 </html>
