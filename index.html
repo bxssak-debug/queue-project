@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyQueue - ระบบจองคิวออนไลน์</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow border-0 text-center">
+                    <div class="card-body p-5">
+                        <h2 class="card-title mb-4 text-primary">🏥 รับบัตรคิวออนไลน์</h2>
+
+                        <div class="mb-3 text-start">
+                            <label class="form-label fw-bold">ชื่อ - นามสกุล</label>
+                            <input type="text" class="form-control form-control-lg" id="patientName"
+                                placeholder="กรอกชื่อของคุณที่นี่">
+                        </div>
+
+                        <div class="mb-4 text-start">
+                            <label class="form-label fw-bold">แผนกที่ต้องการตรวจ</label>
+                            <select class="form-select form-select-lg" id="department">
+                                <option value="general">ตรวจโรคทั่วไป</option>
+                                <option value="dental">ทันตกรรม</option>
+                                <option value="ortho">กระดูกและข้อ</option>
+                            </select>
+                        </div>
+
+                        <button class="btn btn-primary btn-lg w-100 shadow-sm"
+                            onclick="bookQueue()">กดเพื่อรับคิว</button>
+
+                        <div id="resultBox" class="alert d-none mt-4 text-center shadow-sm" role="alert"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import {
+            getFirestore, collection, doc, runTransaction, serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+        // ใส่คีย์ของบอสให้เรียบร้อยแล้วครับ
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrc6ZDe5h8IMOpvUr7YP6heE8QgQZLjwA",
+            authDomain: "easyqueue-ad588.firebaseapp.com",
+            projectId: "easyqueue-ad588",
+            storageBucket: "easyqueue-ad588.firebasestorage.app",
+            messagingSenderId: "374878485971",
+            appId: "1:374878485971:web:798a12b88248d213c50326"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const DEPT_MAP = {
+            general: { prefix: "G", label: "ตรวจโรคทั่วไป" },
+            dental: { prefix: "D", label: "ทันตกรรม" },
+            ortho: { prefix: "O", label: "กระดูกและข้อ" }
+        };
+
+        window.bookQueue = async function () {
+            const btn = document.querySelector(".btn-primary");
+            const nameInput = document.getElementById("patientName");
+            const name = nameInput.value.trim();
+            const deptKey = document.getElementById("department").value;
+            const resultBox = document.getElementById("resultBox");
+
+            // เคลียร์สถานะกล่องผลลัพธ์
+            resultBox.className = "alert mt-4 text-center shadow-sm d-none";
+
+            // เช็คชื่อว่าสั้นไปไหม
+            if (name.length < 3) {
+                resultBox.classList.remove("d-none");
+                resultBox.classList.add("alert-danger");
+                resultBox.innerHTML = "❌ กรุณากรอกชื่ออย่างน้อย 3 ตัวอักษร";
+                return;
+            }
+
+            // ล็อกปุ่มและหมุนโหลด
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> กำลังออกบัตรคิว...`;
+
+            try {
+                const dateKey = new Intl.DateTimeFormat('en-CA', {
+                    timeZone: 'Asia/Bangkok'
+                }).format(new Date());
+
+                const counterRef = doc(db, "counters", `${deptKey}_${dateKey}`);
+                const queueRef = doc(collection(db, "queues"));
+
+                const displayNumber = await runTransaction(db, async (transaction) => {
+                    const counterDoc = await transaction.get(counterRef);
+                    const nextNumber = (counterDoc.exists() ? counterDoc.data().currentNumber : 0) + 1;
+                    const display = `${DEPT_MAP[deptKey].prefix}-${String(nextNumber).padStart(3, "0")}`;
+
+                    transaction.set(counterRef, {
+                        currentNumber: nextNumber,
+                        department: deptKey,
+                        date: dateKey,
+                        lastUpdated: serverTimestamp()
+                    }, { merge: true });
+
+                    transaction.set(queueRef, {
+                        queueNumber: nextNumber,
+                        displayNumber: display,
+                        name: name,
+                        department: deptKey,
+                        date: dateKey,
+                        status: "waiting",
+                        createdAt: serverTimestamp()
+                    });
+
+                    return display;
+                });
+
+                // แสดงผลสำเร็จ
+                resultBox.classList.remove("d-none");
+                resultBox.classList.add("alert-success");
+                resultBox.innerHTML = `
+            <h4 class="mb-2">🎉 จองคิวสำเร็จ!</h4>
+            <p class="mb-1">หมายเลขคิวของคุณคือ</p>
+            <h2 class="fw-bold text-success">${displayNumber}</h2>
+            <p class="mb-0">แผนก: ${DEPT_MAP[deptKey].label}</p>
+        `;
+
+                nameInput.value = "";
+
+            } catch (error) {
+                console.error(error);
+                resultBox.classList.remove("d-none");
+                resultBox.classList.add("alert-danger");
+                resultBox.innerHTML = "❌ ระบบขัดข้อง กรุณาลองใหม่ หรือเช็กการเชื่อมต่ออินเทอร์เน็ต";
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = "กดเพื่อรับคิว";
+            }
+        };
+    </script>
+
+</body>
+
+</html>
