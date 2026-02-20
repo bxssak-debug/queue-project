@@ -60,13 +60,17 @@
 </head>
 
 <body>
+
     <div class="current-section">
-        <div style="font-size: 3rem; color: #aaa;">คิวปัจจุบัน</div>
+        <div style="font-size:3rem;color:#aaa;">คิวปัจจุบัน</div>
         <div id="currentNumber" class="number">--</div>
-        <div style="font-size: 2.5rem; color: #28a745; margin-top: 20px;">กรุณาเชิญที่ช่องบริการ 1</div>
+        <div style="font-size:2.5rem;color:#28a745;margin-top:20px;">
+            กรุณาเชิญที่ช่องบริการ 1
+        </div>
     </div>
+
     <div class="next-section">
-        <h2 style="text-align: center; color: #007bff;">คิวถัดไป</h2>
+        <h2 style="text-align:center;color:#007bff;">คิวถัดไป</h2>
         <div id="nextQueues"></div>
     </div>
 
@@ -74,7 +78,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-        // รหัสจริงของบอสจากหน้า Dashboard
         const firebaseConfig = {
             apiKey: "AIzaSyDrc6ZDe5h8IMOpvUr7YP6heE8QgQZLjwA",
             authDomain: "easyqueue-ad588.firebaseapp.com",
@@ -86,21 +89,38 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
         let lastCalled = "";
+
+        function getTodayKey() {
+            return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(new Date());
+        }
 
         function speak(text) {
             const msg = new SpeechSynthesisUtterance();
-            msg.text = text; msg.lang = 'th-TH'; msg.rate = 0.9;
+            msg.text = text;
+            msg.lang = 'th-TH';
+            msg.rate = 0.9;
+            window.speechSynthesis.cancel();
             window.speechSynthesis.speak(msg);
         }
 
-        onSnapshot(collection(db, "queues"), (snapshot) => {
+        const q = query(
+            collection(db, "queues"),
+            where("date", "==", getTodayKey())
+        );
+
+        onSnapshot(q, (snapshot) => {
             const listDiv = document.getElementById('nextQueues');
             listDiv.innerHTML = "";
+
+            let queues = [];
+            snapshot.forEach(doc => queues.push(doc.data()));
+            queues.sort((a, b) => a.queueNumber - b.queueNumber);
+
             let callingFound = false;
 
-            snapshot.forEach((doc) => {
-                const data = doc.data();
+            queues.forEach(data => {
                 if (data.status === "calling") {
                     document.getElementById('currentNumber').innerText = data.displayNumber;
                     if (data.displayNumber !== lastCalled) {
@@ -108,13 +128,22 @@
                         lastCalled = data.displayNumber;
                     }
                     callingFound = true;
-                } else if (data.status === "waiting") {
-                    listDiv.innerHTML += `<div class="next-card"><div class="next-number">${data.displayNumber}</div></div>`;
+                }
+                else if (data.status === "waiting") {
+                    listDiv.innerHTML += `
+                <div class="next-card">
+                    <div class="next-number">${data.displayNumber}</div>
+                </div>
+            `;
                 }
             });
-            if (!callingFound) document.getElementById('currentNumber').innerText = "--";
+
+            if (!callingFound) {
+                document.getElementById('currentNumber').innerText = "--";
+            }
         });
     </script>
+
 </body>
 
 </html>
