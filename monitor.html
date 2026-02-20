@@ -35,11 +35,6 @@
             flex-direction: column;
         }
 
-        .label {
-            font-size: 3rem;
-            color: #aaa;
-        }
-
         .number {
             font-size: 18rem;
             font-weight: 700;
@@ -61,23 +56,17 @@
             font-weight: 700;
             color: #28a745;
         }
-
-        h2 {
-            text-align: center;
-            font-size: 2.5rem;
-            color: #007bff;
-        }
     </style>
 </head>
 
 <body>
     <div class="current-section">
-        <div class="label">คิวปัจจุบัน</div>
+        <div style="font-size: 3rem; color: #aaa;">คิวปัจจุบัน</div>
         <div id="currentNumber" class="number">--</div>
         <div style="font-size: 2.5rem; color: #28a745; margin-top: 20px;">กรุณาเชิญที่ช่องบริการ 1</div>
     </div>
     <div class="next-section">
-        <h2>คิวถัดไป</h2>
+        <h2 style="text-align: center; color: #007bff;">คิวถัดไป</h2>
         <div id="nextQueues"></div>
     </div>
 
@@ -85,6 +74,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
+        // รหัสจริงของบอสจากหน้า Dashboard
         const firebaseConfig = {
             apiKey: "AIzaSyDrc6ZDe5h8IMOpvUr7YP6heE8QgQZLjwA",
             authDomain: "easyqueue-ad588.firebaseapp.com",
@@ -98,14 +88,12 @@
         const db = getFirestore(app);
         let lastCalled = "";
 
-        // ฟังเสียงเรียก
         function speak(text) {
             const msg = new SpeechSynthesisUtterance();
             msg.text = text; msg.lang = 'th-TH'; msg.rate = 0.9;
             window.speechSynthesis.speak(msg);
         }
 
-        // ดึงข้อมูลจากคอลเลกชันเดียวกับ Dashboard
         onSnapshot(collection(db, "queues"), (snapshot) => {
             const listDiv = document.getElementById('nextQueues');
             listDiv.innerHTML = "";
@@ -121,10 +109,7 @@
                     }
                     callingFound = true;
                 } else if (data.status === "waiting") {
-                    listDiv.innerHTML += `
-                        <div class="next-card">
-                            <div class="next-number">${data.displayNumber}</div>
-                        </div>`;
+                    listDiv.innerHTML += `<div class="next-card"><div class="next-number">${data.displayNumber}</div></div>`;
                 }
             });
             if (!callingFound) document.getElementById('currentNumber').innerText = "--";
